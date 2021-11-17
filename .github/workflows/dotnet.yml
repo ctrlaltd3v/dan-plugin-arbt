@@ -18,7 +18,7 @@ env:
   BUILD_CONFIGURATION: 'Release'    # set this to the appropriate build configuration
   RESOURCE_GROUP_TEST: 'rg-arbt-es-test' 
   SLOT_NAME_SOURCE: 'func-esarbt-test-dev'
-  SLOT_NAME_TARGET: 'func-esarbt-test-dev-qa'
+  SLOT_NAME_TARGET: 'qa'
   DOTNET_VERSION: '6.0.x'
 
 jobs:
@@ -85,4 +85,4 @@ jobs:
       
       - name: Swap dev and qa
         run: |
-          az webapp deployment slot swap -g '${{ env.RESOURCE_GROUP_TEST }}' -n '${{ env.AZURE_FUNCTIONAPP_NAME }}' --slot '${{ env.SLOT_NAME_SOURCE }}' --target-slot '${{ env.SLOT_NAME_TARGET }}'
+          az webapp deployment slot swap -g '${{ env.RESOURCE_GROUP_TEST }}' -n 'someAppName' --slot '${{ env.SLOT_NAME_SOURCE }}' --target-slot '${{ env.SLOT_NAME_TARGET }}'
