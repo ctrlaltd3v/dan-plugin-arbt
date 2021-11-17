@@ -59,12 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: 'dev'
     needs: build-and-publish
-    steps:
-      - name: 'Login via Azure CLI'
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
+    steps:     
       - name: 'Download artifact'
         uses: actions/download-artifact@v2
         with:
