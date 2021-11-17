@@ -16,6 +16,9 @@ env:
   AZURE_FUNCTION_PROJ_PATH: src/Altinn.Dan.Plugin.Arbeidstilsynet  # set this to the path to your function app project
   AZURE_ARTIFACTS_FEED_URL: https://pkgs.dev.azure.com/nadobe/Nadobe/_packaging/Packages/nuget/v3/index.json
   BUILD_CONFIGURATION: 'Release'    # set this to the appropriate build configuration
+  RESOURCE_GROUP_TEST: 'rg-arbt-es-test' 
+  SLOT_NAME_SOURCE: 'func-esarbt-test-dev'
+  SLOT_NAME_TARGET: 'func-esarbt-test-dev-qa'
   DOTNET_VERSION: '6.0.x'
 
 jobs:
@@ -75,20 +78,16 @@ jobs:
           package: './published-app'
           publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_CREDS }}
 
-  deploy-staging:
+  swap-dev:
     runs-on: ubuntu-latest
     environment: 'staging'
     needs: [build-and-publish, deploy-dev]
     steps:
-      - name: 'Download artifact'
-        uses: actions/download-artifact@v2
+      - name: 'Login via Azure CLI' 
+        uses: azure/login@v1
         with:
-          name: dan-plugin-arbt
-          path: './published-app'
-
-      - name: 'Deploy to staging'
-        uses: azure/functions-action@v1
-        with:
-          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-          package: './published-app'
-          publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_CREDS }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Swap dev and qa
+        run: |
+          az webapp deployment slot swap -g '${{ env.RESOURCE_GROUP_TEST }}' -n '${{ env.AZURE_FUNCTIONAPP_NAME }}' --slot '${{ env.SLOT_NAME_SOURCE }}' --target-slot '${{ env.SLOT_NAME_TARGET }}'
