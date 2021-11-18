@@ -15,10 +15,10 @@ runs:
     using: 'composite'
     steps:
       - name: 'Download artifact'
-          uses: actions/download-artifact@v2
-          with:
-            name: ${{inputs.artifact_name}}
-            path: './downloaded-app'
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{inputs.artifact_name}}
+          path: './downloaded-app'
 
       - name: 'Deploy artifact'
         uses: azure/functions-action@v1
