@@ -6,16 +6,15 @@ on:
     paths-ignore:
       - '**/README.md'
       - '**/*.yml'
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 env:
   ROOT_SOLUTION_PATH: ./
   FUNCTION_PROJECT_PATH: src/Altinn.Dan.Plugin.Arbeidstilsynet  # set this to the path to your function app project
   AZURE_ARTIFACTS_FEED_URL: https://pkgs.dev.azure.com/nadobe/Nadobe/_packaging/Packages/nuget/v3/index.json
-  BUILD_CONFIGURATION: 'Release'    # set this to the appropriate build configuration
+  BUILD_CONFIGURATION: 'Release'
 
+  ARTIFACT_NAME: 'dan-plugin-arbt'
   FUNCTIONAPP_NAME_TEST: 'func-esarbt-test-dev'
   FUNCTIONAPP_NAME_PROD: 'func-esarbt-prod-prod'
   RESOURCE_GROUP_TEST: 'rg-arbt-es-test'
@@ -53,7 +52,7 @@ jobs:
       - name: 'Publish artifact'
         uses: actions/upload-artifact@v2
         with:
-          name: dan-plugin-arbt
+          name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.FUNCTION_PROJECT_PATH }}/published-app
 
   deploy-dev:
@@ -61,18 +60,12 @@ jobs:
     environment: 'dev'
     needs: build-and-publish
     steps:
-      - name: 'Download artifact'
-        uses: actions/download-artifact@v2
-        with:
-          name: dan-plugin-arbt
-          path: './published-app'
-
       - name: 'Deploy to dev'
-        uses: azure/functions-action@v1
+        uses: ./.github/workflows/composite/deploy
         with:
-          app-name: ${{ env.FUNCTIONAPP_NAME_TEST }}
-          package: './published-app'
-          publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_CREDS }}
+          artifact_name: ${{ env.ARTIFACT_NAME }}
+          function_app_name: ${{ env.FUNCTIONAPP_NAME_TEST }}
+          publish_profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_CREDS }}
 
   swap-dev-qa:
     runs-on: ubuntu-latest
@@ -97,15 +90,9 @@ jobs:
     environment: 'dev'
     needs: [build-and-publish, deploy-dev, swap-dev-qa]
     steps:
-      - name: 'Download artifact again'
-        uses: actions/download-artifact@v2
-        with:
-          name: dan-plugin-arbt
-          path: './published-app'
-
       - name: 'Redeploy to dev'
-        uses: azure/functions-action@v1
+        uses: ./.github/workflows/composite/deploy
         with:
-          app-name: ${{ env.FUNCTIONAPP_NAME_TEST }}
-          package: './published-app'
-          publish-profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_CREDS }}
+          artifact_name: ${{ env.ARTIFACT_NAME }}
+          function_app_name: ${{ env.FUNCTIONAPP_NAME_TEST }}
+          publish_profile: ${{ secrets.AZURE_FUNCTION_PUBLISH_CREDS }}
