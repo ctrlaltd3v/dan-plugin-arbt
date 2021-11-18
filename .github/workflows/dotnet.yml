@@ -17,8 +17,8 @@ env:
   AZURE_ARTIFACTS_FEED_URL: https://pkgs.dev.azure.com/nadobe/Nadobe/_packaging/Packages/nuget/v3/index.json
   BUILD_CONFIGURATION: 'Release'    # set this to the appropriate build configuration
   RESOURCE_GROUP_TEST: 'rg-arbt-es-test' 
-  SLOT_NAME_SOURCE: 'production'
-  SLOT_NAME_TARGET: 'qa'
+  SLOT_NAME_SOURCE: 'qa'
+  SLOT_NAME_TARGET: 'production'
   DOTNET_VERSION: '6.0.x'
 
 jobs:
@@ -75,7 +75,7 @@ jobs:
 
   swap-dev:
     runs-on: ubuntu-latest
-    environment: 'staging'
+    environment: 'qa'
     needs: [build-and-publish, deploy-dev]
     steps:
       - name: 'Login via Azure CLI' 
